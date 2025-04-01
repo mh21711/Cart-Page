@@ -143,12 +143,13 @@ function ShoppingCartApp() {
             const cartItem = cartItems.find(
               (item) => item.description === product.description
             );
+            const responsiveImageSrc = useResponsiveImage(product.images);
 
             return (
               <div className="product-card" key={product.name}>
                 <div>
                   <Image
-                    src={useResponsiveImage(product.images)}
+                    src={responsiveImageSrc}
                     width={300}
                     height={150}
                     alt={product.name}
