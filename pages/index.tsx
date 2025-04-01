@@ -1,12 +1,19 @@
 import Image from "next/image";
 import { products } from "./data";
 import { useEffect, useState } from "react";
+import ProductCart from "./productCart";
 
 interface CartItem {
   quantity: number;
   thumbnail: string;
   description: string;
   price: string;
+}
+
+interface ProductImages {
+  mobile: string;
+  tablet: string;
+  desktop: string;
 }
 
 interface Product {
@@ -19,12 +26,6 @@ interface Product {
     tablet: string;
     thumbnail: string;
   };
-}
-
-interface ProductImages {
-  mobile: string;
-  tablet: string;
-  desktop: string;
 }
 
 function ShoppingCartApp() {
@@ -66,12 +67,14 @@ function ShoppingCartApp() {
 
   // Decrease item quantity
   function decreaseQuantity(item: CartItem) {
-    const updatedCart = cartItems.map((cartItem) => {
-      if (cartItem === item) {
-        return { ...cartItem, quantity: cartItem.quantity - 1 };
-      }
-      return cartItem;
-    }).filter((item) => item.quantity > 0); // Remove items with zero quantity
+    const updatedCart = cartItems
+      .map((cartItem) => {
+        if (cartItem === item) {
+          return { ...cartItem, quantity: cartItem.quantity - 1 };
+        }
+        return cartItem;
+      })
+      .filter((item) => item.quantity > 0); // Remove items with zero quantity
 
     setCartItems(updatedCart);
   }
@@ -140,66 +143,17 @@ function ShoppingCartApp() {
         <h1>Desserts</h1>
         <div className="products-grid">
           {products.map((product) => {
-            const cartItem = cartItems.find(
-              (item) => item.description === product.description
-            );
-            const responsiveImageSrc = useResponsiveImage(product.images);
+            const cartItem = cartItems.find((item) => product.description === item.description)
 
             return (
-              <div className="product-card" key={product.name}>
-                <div>
-                  <Image
-                    src={responsiveImageSrc}
-                    width={300}
-                    height={150}
-                    alt={product.name}
-                    priority
-                  />
-                  {cartItem ? (
-                    <div className="quantity-control">
-                      <button 
-                        onClick={() => decreaseQuantity(cartItem)}
-                        className="quantity-button"
-                      >
-                        <Image
-                          src="/images/icon-decrement-quantity.svg"
-                          width={5}
-                          height={5}
-                          alt="Decrease quantity"
-                        />
-                      </button>
-                      <span>{cartItem.quantity}</span>
-                      <button 
-                        onClick={() => increaseQuantity(cartItem)}
-                        className="quantity-button"
-                      >
-                        <Image
-                          src="/images/icon-increment-quantity.svg"
-                          width={5}
-                          height={5}
-                          alt="Increase quantity"
-                        />
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      className="add-to-cart-button"
-                      onClick={() => addToCart(product)}
-                    >
-                      <Image
-                        src="/images/icon-add-to-cart.svg"
-                        width={10}
-                        height={10}
-                        alt="Add to cart"
-                      />
-                      Add To Cart
-                    </button>
-                  )}
-                </div>
-                <h3 className="product-name">{product.name}</h3>
-                <p className="product-description">{product.description}</p>
-                <p className="product-price">{product.price}</p>
-              </div>
+              <ProductCart
+                product={product}
+                decreaseQuantity={decreaseQuantity}
+                increaseQuantity={increaseQuantity}
+                addToCart={addToCart}
+                useResponsiveImage={useResponsiveImage}
+                cartItem={cartItem}
+              />
             );
           })}
         </div>
@@ -227,11 +181,14 @@ function ShoppingCartApp() {
                   <p>
                     <span>{item.quantity}x</span> <span>@{item.price}</span>
                     <span>
-                      ${(parseFloat(item.price.slice(1)) * item.quantity).toFixed(2)}
+                      $
+                      {(
+                        parseFloat(item.price.slice(1)) * item.quantity
+                      ).toFixed(2)}
                     </span>
                   </p>
                 </div>
-                <button 
+                <button
                   className="remove-item"
                   onClick={() => removeFromCart(item)}
                   aria-label="Remove item"
@@ -253,8 +210,8 @@ function ShoppingCartApp() {
               />
               This is a carbon-neutral delivery
             </p>
-            <button 
-              className="confirm-order-button" 
+            <button
+              className="confirm-order-button"
               onClick={confirmOrder}
               disabled={cartItems.length === 0}
             >
@@ -289,12 +246,16 @@ function ShoppingCartApp() {
                     <div>
                       <p>{item.description}</p>
                       <p>
-                        <span>{item.quantity}x</span> <span>@ {item.price}</span>
+                        <span>{item.quantity}x</span>{" "}
+                        <span>@ {item.price}</span>
                       </p>
                     </div>
                   </div>
                   <p className="item-total">
-                    ${(parseFloat(item.price.slice(1)) * item.quantity).toFixed(2)}
+                    $
+                    {(parseFloat(item.price.slice(1)) * item.quantity).toFixed(
+                      2
+                    )}
                   </p>
                 </div>
               ))}
@@ -302,10 +263,7 @@ function ShoppingCartApp() {
                 <p>Order Total</p>
                 <p>{orderTotal}</p>
               </div>
-              <button 
-                className="new-order-button" 
-                onClick={startNewOrder}
-              >
+              <button className="new-order-button" onClick={startNewOrder}>
                 Start New Order
               </button>
             </div>
