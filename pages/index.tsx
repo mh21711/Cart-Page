@@ -153,6 +153,7 @@ function ShoppingCartApp() {
                 addToCart={addToCart}
                 useResponsiveImage={useResponsiveImage}
                 cartItem={cartItem}
+                key={product.description}
               />
             );
           })}
