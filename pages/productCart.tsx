@@ -42,7 +42,16 @@ function ProductCart({
   useResponsiveImage,
   cartItem,
 }: ProductProps) {
-  const responsiveImageSrc = useResponsiveImage(product.images);
+  // Provide default images if not available
+  const defaultImages = {
+    desktop: "/images/default-desktop.jpg",
+    mobile: "/images/default-mobile.jpg",
+    tablet: "/images/default-tablet.jpg",
+    thumbnail: "/images/default-thumbnail.jpg",
+  };
+
+  const images = product.images || defaultImages;
+  const responsiveImageSrc = useResponsiveImage(images);
 
   return (
     <div className="product-card" key={product.name}>
