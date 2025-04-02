@@ -13,17 +13,17 @@ interface Product {
 }
 
 interface CartItem {
-    quantity: number;
-    thumbnail: string;
-    description: string;
-    price: string;
-  }
+  quantity: number;
+  thumbnail: string;
+  description: string;
+  price: string;
+}
 
 interface ProductImages {
-    mobile: string;
-    tablet: string;
-    desktop: string;
-  }
+  mobile: string;
+  tablet: string;
+  desktop: string;
+}
 
 interface ProductProps {
   decreaseQuantity: (item: CartItem) => void;
@@ -43,7 +43,7 @@ function ProductCart({
   cartItem,
 }: ProductProps) {
   const responsiveImageSrc = useResponsiveImage(product.images);
-  
+
   return (
     <div className="product-card" key={product.name}>
       <div>
