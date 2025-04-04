@@ -1,22 +1,21 @@
 import Image from "next/image";
-import { products } from "./data";
-import { useEffect, useState } from "react";
-import ProductCart from "./productCart";
+import { products } from "../data";
+import { useEffect, useRef, useState } from "react";
 
-interface CartItem {
+export interface CartItem {
   quantity: number;
   thumbnail: string;
   description: string;
   price: string;
 }
 
-interface ProductImages {
+export interface ProductImages {
   mobile: string;
   tablet: string;
   desktop: string;
 }
 
-interface Product {
+export interface Product {
   name: string;
   description: string;
   price: string;
@@ -33,6 +32,26 @@ function ShoppingCartApp() {
   const [totalItems, setTotalItems] = useState<number>(0);
   const [orderTotal, setOrderTotal] = useState<string>("$0.00");
   const [isOrderConfirmed, setIsOrderConfirmed] = useState<boolean>(false);
+  const [containerWidth, setContainerWidth] = useState<number>(0);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Observe container width changes
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setContainerWidth(entry.contentRect.width);
+      }
+    });
+
+    resizeObserver.observe(containerRef.current);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
 
   // Add product to cart
   function addToCart(product: Product) {
@@ -110,51 +129,78 @@ function ShoppingCartApp() {
     setCartItems([]);
   }
 
-  // Responsive image hook
-  function useResponsiveImage(images: ProductImages) {
-    const [imageSrc, setImageSrc] = useState(images.desktop);
-
-    useEffect(() => {
-      function handleResize() {
-        if (typeof window === "undefined") return;
-
-        const width = window.innerWidth;
-        if (width <= 767) {
-          setImageSrc(images.mobile);
-        } else if (width <= 1023) {
-          setImageSrc(images.tablet);
-        } else {
-          setImageSrc(images.desktop);
-        }
-      }
-
-      handleResize(); // Set initial value
-      window.addEventListener("resize", handleResize);
-      return () => window.removeEventListener("resize", handleResize);
-    }, [images]);
-
-    return imageSrc;
-  }
-
   return (
-    <div className="app-container">
+    <div className="app-container" ref={containerRef}>
       {/* Products Section */}
       <div className="products-section">
         <h1>Desserts</h1>
         <div className="products-grid">
           {products.map((product) => {
-            const cartItem = cartItems.find((item) => product.description === item.description)
+            const cartItem = cartItems.find(
+              (item) => product.description === item.description
+            );
 
             return (
-              <ProductCart
-                product={product}
-                decreaseQuantity={decreaseQuantity}
-                increaseQuantity={increaseQuantity}
-                addToCart={addToCart}
-                useResponsiveImage={useResponsiveImage}
-                cartItem={cartItem}
-                key={product.description}
-              />
+              <div className="product-card" key={product.name}>
+                <div>
+                  <Image
+                    src={
+                      containerWidth <= 768
+                        ? product.images.mobile
+                        : containerWidth <= 1024
+                        ? product.images.tablet
+                        : product.images.desktop
+                    }
+                    width={300}
+                    height={150}
+                    alt={product.name}
+                    priority
+                  />
+                  {cartItem ? (
+                    <div className="quantity-control">
+                      <button
+                        onClick={() => decreaseQuantity(cartItem)}
+                        className="quantity-button"
+                      >
+                        <Image
+                          src="/images/icon-decrement-quantity.svg"
+                          width={5}
+                          height={5}
+                          alt="Decrease quantity"
+                        />
+                      </button>
+                      <span>{cartItem.quantity}</span>
+                      <button
+                        onClick={() => increaseQuantity(cartItem)}
+                        className="quantity-button"
+                      >
+                        <Image
+                          src="/images/icon-increment-quantity.svg"
+                          width={5}
+                          height={5}
+                          alt="Increase quantity"
+                        />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      className="add-to-cart-button"
+                      onClick={() => addToCart(product)}
+                    >
+                      <Image
+                        src="/images/icon-add-to-cart.svg"
+                        width={10}
+                        height={10}
+                        alt="Add to cart"
+                      />
+                      Add To Cart
+                    </button>
+                  )}
+                </div>
+                <h3 className="product-name">{product.name}</h3>
+                <p className="product-description">{product.description}</p>
+                <p className="product-price">{product.price}</p>
+              </div>
             );
           })}
         </div>
