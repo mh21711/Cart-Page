@@ -55,6 +55,7 @@ body {
 
 .product-card > div:first-child {
   position: relative;
+  width: fit-content;
 }
 
 .product-card {
